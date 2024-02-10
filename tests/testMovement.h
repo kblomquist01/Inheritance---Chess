@@ -32,6 +32,7 @@ public:
 		getPositionToInvalid();
 		getPositionToBorder();
 
+		getMoveTypeEmpty();
 		getMoveTypePawn();
 		getMoveTypeTower();
 		getMoveTypeBishop();
@@ -72,6 +73,7 @@ private:
 	int getPositionToInvalid();
 	int getPositionToBorder();
 
+	char getMoveTypeEmpty();
 	char getMoveTypePawn();
 	char getMoveTypeTower();
 	char getMoveTypeBishop();
