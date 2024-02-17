@@ -6,274 +6,25 @@
 
 #include "uiInteract.h"   // for Interface
 #include "uiDraw.h"       // for draw*
+#include "Piece.h"
+#include "Rook.h"
+#include "Knight.h"
+#include "Bishop.h"
+#include "Queen.h"
+#include "King.h"
+#include "Pawn.h"
 #include <set>            // for STD::SET
 #include <cassert>        // for ASSERT
 #include <fstream>        // for IFSTREAM
 #include <string>         // for STRING
+#include <iostream>       // for CERR
 using namespace std;
-
-/***********************************************
- * Row Column
- * Simple row/column pair
- ************************************************/
-struct RC
-{
-   int row;
-   int col;
-};
-
-/****************************************************
- * IS NOT WHITE
- * Is the current location valid and the piece is either
- * black (uppercase) or space
- ***************************************************/
-inline bool isNotWhite(const char* board, int row, int col)
-{
-   // not white if we are off the board or if we are looking at a space
-   if (row < 0 || row >= 8 || col < 0 || col >= 8)
-      return false;
-   char piece = board[row * 8 + col];
-
-   return piece == ' ' || (piece >= 'A' && piece <= 'Z');
-}
-
-/****************************************************
- * IS  WHITE
- * Is the current location valid and the piece is white
- ***************************************************/
-inline bool isWhite(const char* board, int row, int col)
-{
-   // not white if we are off the board or if we are looking at a space
-   if (row < 0 || row >= 8 || col < 0 || col >= 8)
-      return false;
-   char piece = board[row * 8 + col];
-
-   return (piece >= 'a' && piece <= 'z');
-}
-
-/****************************************************
- * IS NOT BLACK
- * Is the current location valid and the piece is either
- * white (lowercase) or space
- ***************************************************/
-inline bool isNotBlack(const char* board, int row, int col)
-{
-   // not white if we are off the board or if we are looking at a space
-   if (row < 0 || row >= 8 || col < 0 || col >= 8)
-      return false;
-   char piece = board[row * 8 + col];
-
-   return piece == ' ' || (piece >= 'a' && piece <= 'z');
-}
-
-/****************************************************
- * IS  BLACK
- * Is the current location valid and the piece is black
- ***************************************************/
-inline bool isBlack(const char* board, int row, int col)
-{
-   // not white if we are off the board or if we are looking at a space
-   if (row < 0 || row >= 8 || col < 0 || col >= 8)
-      return false;
-   char piece = board[row * 8 + col];
-
-   return (piece >= 'A' && piece <= 'Z');
-}
-/*********************************************************
- * GET POSSIBLE MOVES
- * Determine all the possible moves for a given chess piece
- *********************************************************/
-set <int> getPossibleMoves(const char* board, int location)
-{
-   set <int> possible;
-
-   // return the empty set if there simply are no possible moves
-   if (location < 0 || location >= 64 || board[location] == ' ')
-      return possible;
-   int row = location / 8;  // current location row
-   int col = location % 8;  // current location column
-   int r;                   // the row we are checking
-   int c;                   // the column we are checking
-   bool amBlack = isBlack(board, row, col);
-
-   //
-   // PAWN
-   //
-   if (board[location] == 'P')
-   {
-      c = col;
-      r = row - 2;
-      if (row == 6 && board[r * 8 + c] == ' ')
-         possible.insert(r * 8 + c);  // forward two blank spaces
-      r = row - 1;
-      if (r >= 0 && board[r * 8 + c] == ' ')
-         possible.insert(r * 8 + c);  // forward one black space
-      c = col - 1;
-      if (isWhite(board, r, c))
-         possible.insert(r * 8 + c);    // attack left
-      c = col + 1;
-      if (isWhite(board, r, c))
-         possible.insert(r * 8 + c);    // attack right
-      // what about en-passant and pawn promotion
-   }
-   if (board[location] == 'p')
-   {
-      c = col;
-      r = row + 2;
-      if (row == 1 && board[r * 8 + c] == ' ')
-         possible.insert(r * 8 + c);  // forward two blank spaces
-      r = row + 1;
-      if (r < 8 && board[r * 8 + c] == ' ')
-         possible.insert(r * 8 + c);    // forward one blank space
-      c = col - 1;
-      if (isBlack(board, r, c))
-         possible.insert(r * 8 + c);      // attack left
-      c = col + 1;
-      if (isBlack(board, r, c))
-         possible.insert(r * 8 + c);      // attack right
-      // what about en-passant and pawn promotion
-   }
-
-   //
-   // KNIGHT
-   //
-   if (board[location] == 'N' || board[location] == 'n')
-   {
-      RC moves[8] = 
-      {
-               {-1,  2}, { 1,  2},
-      {-2,  1},                    { 2,  1},
-      {-2, -1},                    { 2, -1},
-               {-1, -2}, { 1, -2}
-      };
-      for (int i = 0; i < 8; i++)
-      {
-         r = row + moves[i].row;
-         c = col + moves[i].col;
-         if ( amBlack && isNotBlack(board, r, c))
-            possible.insert(r * 8 + c);
-         if (!amBlack && isNotWhite(board, r, c))
-            possible.insert(r * 8 + c);
-      }
-   }
-
-   //
-   // KING
-   //
-   if (board[location] == 'K' || board[location] == 'k')
-   {
-      RC moves[8] =
-      {
-         {-1,  1}, {0,  1}, {1,  1},
-         {-1,  0},          {1,  0},
-         {-1, -1}, {0, -1}, {1, -1}
-      };
-      for (int i = 0; i < 8; i++)
-      {
-         r = row + moves[i].row;
-         c = col + moves[i].col;
-         if ( amBlack && isNotBlack(board, r, c))
-            possible.insert(r * 8 + c);
-         if (!amBlack && isNotWhite(board, r, c))
-            possible.insert(r * 8 + c);
-      }
-      // what about castling?
-   }
-
-   //
-   // QUEEN
-   //
-   if (board[location] == 'Q' || board[location] == 'q')
-   {
-      RC moves[8] =
-      {
-         {-1,  1}, {0,  1}, {1,  1},
-         {-1,  0},          {1,  0},
-         {-1, -1}, {0, -1}, {1, -1}
-      };
-      for (int i = 0; i < 8; i++)
-      {
-         r = row + moves[i].row;
-         c = col + moves[i].col;
-         while (r >= 0 && r < 8 && c >= 0 && c < 8 && 
-                board[r * 8 + c] == ' ')
-         {
-            possible.insert(r * 8 + c);
-            r += moves[i].row;
-            c += moves[i].col;
-         }
-         if ( amBlack && isNotBlack(board, r, c))
-            possible.insert(r * 8 + c);
-         if (!amBlack && isNotWhite(board, r, c))
-            possible.insert(r * 8 + c);
-      }
-   }
-
-   //
-   // ROOK
-   //
-   if (board[location] == 'R' || board[location] == 'r')
-   {
-      RC moves[4] =
-      {
-                  {0,  1},
-         {-1, 0},         {1, 0},
-                  {0, -1}
-      };
-      for (int i = 0; i < 4; i++)
-      {
-         r = row + moves[i].row;
-         c = col + moves[i].col;
-         while (r >= 0 && r < 8 && c >= 0 && c < 8 &&
-            board[r * 8 + c] == ' ')
-         {
-            possible.insert(r * 8 + c);
-            r += moves[i].row;
-            c += moves[i].col;
-         }
-         if (amBlack && isNotBlack(board, r, c))
-            possible.insert(r * 8 + c);
-         if (!amBlack && isNotWhite(board, r, c))
-            possible.insert(r * 8 + c);
-      }
-   }
-
-   //
-   // BISHOP
-   //
-   if (board[location] == 'B' || board[location] == 'b')
-   {
-      RC moves[4] =
-      {
-         {-1,  1}, {1,  1},
-         {-1, -1}, {1, -1}
-      };
-      for (int i = 0; i < 4; i++)
-      {
-         r = row + moves[i].row;
-         c = col + moves[i].col;
-         while (r >= 0 && r < 8 && c >= 0 && c < 8 &&
-            board[r * 8 + c] == ' ')
-         {
-            possible.insert(r * 8 + c);
-            r += moves[i].row;
-            c += moves[i].col;
-         }
-         if (amBlack && isNotBlack(board, r, c))
-            possible.insert(r * 8 + c);
-         if (!amBlack && isNotWhite(board, r, c))
-            possible.insert(r * 8 + c);
-      }
-   }
-
-   return possible;
-}
 
 /***************************************************
  * DRAW
  * Draw the current state of the game
  ***************************************************/
-void draw(const char* board, const Interface & ui, const set <int> & possible)
+void draw(const Piece* board, const Interface & ui, const set <int> & possible)
 {
    ogstream gout;
    
@@ -291,7 +42,7 @@ void draw(const char* board, const Interface & ui, const set <int> & possible)
 
    // draw the pieces
    for (int i = 0; i < 64; i++)
-      switch (board[i])
+      switch (board[i].getType())
       {
       case 'P':
          gout.drawPawn(i, true);
@@ -332,34 +83,6 @@ void draw(const char* board, const Interface & ui, const set <int> & possible)
       }
 }
 
-/*********************************************
- * MOVE 
- * Execute one movement. Return TRUE if successful
- *********************************************/
-bool move(char* board, int positionFrom, int positionTo)
-{
-   // do not move if a move was not indicated
-   if (positionFrom == -1 || positionTo == -1)
-      return false;
-   assert(positionFrom >= 0 && positionFrom < 64);
-   assert(positionTo >= 0 && positionTo < 64);
-
-
-   // find the set of possible moves from our current location
-   set <int> possiblePrevious = getPossibleMoves(board, positionFrom);
-
-   // only move there is the suggested move is on the set of possible moves
-   if (possiblePrevious.find(positionTo) != possiblePrevious.end())
-   {
-      board[positionTo] = board[positionFrom];
-      board[positionFrom] = ' ';
-      return true;
-   }
-
-   return false;
-
-}
-
 /*************************************
  * All the interesting work happens here, when
  * I get called back from OpenGL to draw a frame.
@@ -367,27 +90,28 @@ bool move(char* board, int positionFrom, int positionTo)
  * engine will wait until the proper amount of
  * time has passed and put the drawing on the screen.
  **************************************/
-void callBack(Interface *pUI, void * p)
+void callBack(Interface* pUI, void* p)
 {
-   set <int> possible;
+    set<int> possible;
 
-   // the first step is to cast the void pointer into a game object. This
-   // is the first step of every single callback function in OpenGL. 
-   char * board = (char *)p;  
+    // Cast the void pointer to a Piece pointer
+    Piece* board = (Piece*) p;
 
-   // move 
-   if (move(board, pUI->getPreviousPosition(), pUI->getSelectPosition()))
-      pUI->clearSelectPosition();
-   else
-      possible = getPossibleMoves(board, pUI->getSelectPosition());
+    // move
+    if (board->move(board, pUI->getPreviousPosition(), pUI->getSelectPosition()))
+        pUI->clearSelectPosition();
+    else
+    {
+        // Call getPossibleMoves through the Piece pointer
+        possible = board->getPossibleMoves(board, pUI->getSelectPosition());
+    }
 
-   // if we clicked on a blank spot, then it is not selected
-   if (pUI->getSelectPosition() != -1 && board[pUI->getSelectPosition()] == ' ')
-      pUI->clearSelectPosition();
+    // if we clicked on a blank spot, then it is not selected
+    if (pUI->getSelectPosition() != -1 && board[pUI->getSelectPosition()].getType() == ' ')
+        pUI->clearSelectPosition();
 
-   // draw the board
-   draw(board, *pUI, possible);
-
+    // draw the board
+    draw(board, *pUI, possible);
 }
 
 /********************************************************
@@ -462,7 +186,7 @@ void parse(const string& textMove, int& positionFrom, int& positionTo)
  * READ FILE
  * Read a file where moves are encoded in Smith notation
  *******************************************************/
-void readFile(const char* fileName, char* board)
+void readFile(const char* fileName, Piece* board)
 {
    // open the file
    ifstream fin(fileName);
@@ -477,7 +201,7 @@ void readFile(const char* fileName, char* board)
       int positionFrom;
       int positionTo;
       parse(textMove, positionFrom, positionTo);
-      valid = move(board, positionFrom, positionTo);
+      valid = board[positionFrom].move(board, positionFrom, positionTo);
    }
 
    // close and done
@@ -504,16 +228,15 @@ int main(int argc, char** argv)
 
    // Initialize the game class
    // note this is upside down: 0 row is at the bottom
-   char board[64] = {
-      'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r',
-      'p', 'p', 'p', 'p', 'p', 'p', 'p', 'p',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      // ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P',
-      'R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'
+   Piece board[64] = {
+        Piece('r'),  Knight('n'), Bishop('b'), Queen('q'), King('k'),  Bishop('b'), Knight('n'), Piece('r'),
+        Pawn('p'),  Pawn('p'),   Pawn('p'),   Pawn('p'),  Pawn('p'),  Pawn('p'),   Pawn('p'),   Pawn('p'),
+        Piece(' '), Piece(' '),  Piece(' '),  Piece(' '), Piece(' '), Piece(' '),  Piece(' '),  Piece(' '),
+        Piece(' '), Piece(' '),  Piece(' '),  Piece(' '), Piece(' '), Piece(' '),  Piece(' '),  Piece(' '),
+        Piece(' '), Piece(' '),  Piece(' '),  Piece(' '), Piece(' '), Piece(' '),  Piece(' '),  Piece(' '),
+        Piece(' '), Piece(' '),  Piece(' '),  Piece(' '), Piece(' '), Piece(' '),  Piece(' '),  Piece(' '),
+        Pawn('P'), Pawn('P'),    Pawn('P'),   Pawn('P'),  Pawn('P'),  Pawn('P'),   Pawn('P'),   Pawn('P'),
+        Piece('R'), Knight('N'),  Bishop('B'), Queen('Q'), King('K'),  Bishop('B'), Knight('N'),  Piece('R')
    };
    
 #ifdef _WIN32
