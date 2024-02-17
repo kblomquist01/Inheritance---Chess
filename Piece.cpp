@@ -2,10 +2,13 @@
 
 
 
-
-bool Piece::move(Piece* board[], int positionFrom, int positionTo)
+/****************************************************
+    * MOVE
+    * moves pieces from positionFrom to positionTo if valid
+    ***************************************************/
+bool Piece::move(void* bord, int positionFrom, int positionTo)
 {
-    //Piece* board = (Piece*)bord;
+    Piece* board = (Piece*)bord;
     // do not move if a move was not indicated
     if (positionFrom == -1 || positionTo == -1)
         return false;
@@ -17,9 +20,9 @@ bool Piece::move(Piece* board[], int positionFrom, int positionTo)
     set <int> possiblePrevious = getPossibleMoves(board, positionFrom);
 
     // Enpassant movement
-    if (board[positionFrom]->getType() == 'P') {
+    if (board[positionFrom] == 'P') {
 
-        if (board[positionTo]->getType() == ' ' && board[positionTo + 8]->getType() == 'p') {
+        if (board[positionTo] == ' ' && board[positionTo - 8] == 'p') {
             if (possiblePrevious.find(positionTo) != possiblePrevious.end())
             {
                 board[positionTo] = board[positionFrom];
@@ -139,7 +142,7 @@ bool Piece::move(Piece* board[], int positionFrom, int positionTo)
                 board[row * 8 + col].isWhiteTurn = !isWhiteTurn;
             }
         }
-        
+
 
 
 
@@ -158,6 +161,10 @@ bool Piece::move(Piece* board[], int positionFrom, int positionTo)
 
 }
 
+/****************************************************
+    * GET POSSIBLE MOVES
+    * returns the moves the selected piece can make
+    ***************************************************/
 set <int> Piece::getPossibleMoves(void* bord, int location) {
     set <int> possible;
     Piece* board = (Piece*)bord;
@@ -177,10 +184,10 @@ set <int> Piece::getPossibleMoves(void* bord, int location) {
     {
         c = col;
         r = row - 2;
-        if (row == 6 && board[r * 8 + c] == ' ') 
-            if(testMoveOutCheck(bord, location, r * 8 + c))
+        if (row == 6 && board[r * 8 + c] == ' ')
+            if (testMoveOutCheck(bord, location, r * 8 + c))
                 possible.insert(r * 8 + c);  // forward two blank spaces
-            
+
         r = row - 1;
         if (r >= 0 && board[r * 8 + c] == ' ')
             if (testMoveOutCheck(bord, location, r * 8 + c))
@@ -205,7 +212,7 @@ set <int> Piece::getPossibleMoves(void* bord, int location) {
             if (isWhite(board, r, c) && board[(r * 8 + c)].getCanBeEnpassant())
                 if (testMoveOutCheck(bord, location, r * 8 - 8 + c))
                     possible.insert(r * 8 - 8 + c);    // enpassant left
-                
+
         }
 
         // what about en-passant and pawn promotion
@@ -236,12 +243,12 @@ set <int> Piece::getPossibleMoves(void* bord, int location) {
             if (isBlack(board, r, c) && (board[r * 8 + c]).getCanBeEnpassant())
                 if (testMoveOutCheck(bord, location, r * 8 + 8 + c))
                     possible.insert(r * 8 + 8 + c);    // enpassant right
-                
+
             c = col - 1;
             if (isBlack(board, r, c) && (board[r * 8 + c]).getCanBeEnpassant())
                 if (testMoveOutCheck(bord, location, r * 8 + 8 + c))
                     possible.insert(r * 8 + 8 + c);    // enpassant left
-                
+
         }
 
     }
@@ -332,7 +339,7 @@ set <int> Piece::getPossibleMoves(void* bord, int location) {
                 }
             }
         }
-       
+
     }
 
     if (board[location] == 'k' && isWhiteTurn)
@@ -357,7 +364,7 @@ set <int> Piece::getPossibleMoves(void* bord, int location) {
         // what about castling?
 
         r = row;
-        
+
         if (board[location] == 'k' && r == 0) {
             c = col + 1; // king side
             if (board[r * 8 + c] == ' ' && board[r * 8 + (c + 1)] == ' ' && board[r * 8 + (c + 2)] == 'r') {
@@ -581,7 +588,7 @@ set <int> Piece::getPossibleChecks(void* bord, int location) {
             {-1,  0},          {1,  0},
             {-1, -1}, {0, -1}, {1, -1}
         };
-        
+
         for (int i = 0; i < 8; i++)
         {
             r = row + repeatMoves[i].row;
@@ -589,7 +596,7 @@ set <int> Piece::getPossibleChecks(void* bord, int location) {
             while (r >= 0 && r < 8 && c >= 0 && c < 8 &&
                 board[r * 8 + c] == ' ')
             {
-                
+
 
                 r += repeatMoves[i].row;
                 c += repeatMoves[i].col;
@@ -608,65 +615,69 @@ set <int> Piece::getPossibleChecks(void* bord, int location) {
             };
 
             for (int i = 0; i < 8; i++)
-                {
-                    r = row + singleMoves[i].row;
-                    c = col + singleMoves[i].col;
+            {
+                r = row + singleMoves[i].row;
+                c = col + singleMoves[i].col;
 
-                    if (r <= 0 && r > 8 && c <= 0 && c > 8 && board[r * 8 + c].getType() == 'N')
-                        possible.insert(r * 8 + c);
-                    
-                }
-            
+                if (r <= 0 && r > 8 && c <= 0 && c > 8 && board[r * 8 + c].getType() == 'N')
+                    possible.insert(r * 8 + c);
+
+            }
+
         }
     }
     else if (board[location] == 'K' && !isWhiteTurn)
     {
-         RC repeatMoves[8] =
-         {
-             {-1,  1}, {0,  1}, {1,  1},
-             {-1,  0},          {1,  0},
-             {-1, -1}, {0, -1}, {1, -1}
-         };
-         
-         for (int i = 0; i < 8; i++)
-         {
-             r = row + repeatMoves[i].row;
-             c = col + repeatMoves[i].col;
-             while (r >= 0 && r < 8 && c >= 0 && c < 8 &&
-                 board[r * 8 + c] == ' ')
-             {
-                 
-         
-                 r += repeatMoves[i].row;
-                 c += repeatMoves[i].col;
-             }
-             if (((i == 0 || i == 2 || i == 5 || i == 7) && board[r * 8 + c].getType() == 'b') || board[r * 8 + c].getType() == 'q')
-                 possible.insert(r * 8 + c);
-             else if ((i == 1 || i == 3 || i == 4 || i == 6) && board[r * 8 + c].getType() == 'r')
-                 possible.insert(r * 8 + c);
-         
-             RC singleMoves[8] =
-             {
-                      {-1,  2}, { 1,  2},
-             {-2,  1},                    { 2,  1},
-             {-2, -1},                    { 2, -1},
-                      {-1, -2}, { 1, -2}
-             };
-         
-             for (int i = 0; i < 8; i++)
-             {
-                 r = row + singleMoves[i].row;
-                 c = col + singleMoves[i].col;
-         
-                 if (board[r * 8 + c].getType() == 'n')
-                     possible.insert(r * 8 + c);
-         
-             }
-         
-         }
+        RC repeatMoves[8] =
+        {
+            {-1,  1}, {0,  1}, {1,  1},
+            {-1,  0},          {1,  0},
+            {-1, -1}, {0, -1}, {1, -1}
+        };
+
+        for (int i = 0; i < 8; i++)
+        {
+            r = row + repeatMoves[i].row;
+            c = col + repeatMoves[i].col;
+            while (r >= 0 && r < 8 && c >= 0 && c < 8 &&
+                board[r * 8 + c] == ' ')
+            {
+
+
+                r += repeatMoves[i].row;
+                c += repeatMoves[i].col;
+            }
+            if (((i == 0 || i == 2 || i == 5 || i == 7) && board[r * 8 + c].getType() == 'b') || board[r * 8 + c].getType() == 'q')
+                possible.insert(r * 8 + c);
+            else if ((i == 1 || i == 3 || i == 4 || i == 6) && board[r * 8 + c].getType() == 'r')
+                possible.insert(r * 8 + c);
+
+            RC singleMoves[8] =
+            {
+                     {-1,  2}, { 1,  2},
+            {-2,  1},                    { 2,  1},
+            {-2, -1},                    { 2, -1},
+                     {-1, -2}, { 1, -2}
+            };
+
+            for (int i = 0; i < 8; i++)
+            {
+                r = row + singleMoves[i].row;
+                c = col + singleMoves[i].col;
+
+                if (board[r * 8 + c].getType() == 'n')
+                    possible.insert(r * 8 + c);
+
+            }
+
+        }
     }
     return possible;
 }
+/****************************************************
+    * GET IN CHECK
+    * tests to see if the king is in check
+    ***************************************************/
 bool Piece::getInCheck(void* bord) {
     Piece* board = (Piece*)bord;
     int king = 0;
@@ -681,23 +692,6 @@ bool Piece::getInCheck(void* bord) {
         set <int> possible = getPossibleChecks(board, king);
         if (possible.size() == 0)
             return false;
-        /*for (int row = 7; row >= 0; row--) {
-            for (int col = 0; col < 8; col++) {
-
-
-                board[0].isWhiteTurn = !isWhiteTurn;
-                set <int> possible = getPossibleMoves2(board, king);
-                auto it = possible.find(king);
-                if (it != possible.end()) {
-
-                    board[0].isWhiteTurn = !isWhiteTurn;
-                    return true;
-                }
-
-                board[0].isWhiteTurn = !isWhiteTurn;
-                
-            }
-        }*/
     }
     else if (!isWhiteTurn) {
         for (int row = 7; row >= 0; row--) {
@@ -710,25 +704,15 @@ bool Piece::getInCheck(void* bord) {
         set <int> possible = getPossibleChecks(board, king);
         if (possible.size() == 0)
             return false;
-        /*for (int row = 7; row >= 0; row--) {
-            for (int col = 0; col < 8; col++) {
 
-                board[0].isWhiteTurn = !isWhiteTurn;
-                set <int> possible = getPossibleMoves2(board, king);
-                auto it = possible.find(king);
-                if (it != possible.end()) {
-
-                    board[0].isWhiteTurn = !isWhiteTurn;
-                    return true;
-                }
-
-                board[0].isWhiteTurn = !isWhiteTurn;
-            }
-        }*/
     }
     return true;
 }
 
+/****************************************************
+    * TEST MOVE OUT CHECK
+    * tests if the piece can move the king out of check with a move
+    ***************************************************/
 bool Piece::testMoveOutCheck(void* bord, int positionFrom, int positionTo) {
     Piece* board = (Piece*)bord;
     bool willBeInCheck;

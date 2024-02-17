@@ -9,7 +9,6 @@
 #include "Piece.h"
 #include "Castleable.h"
 #include "Pawn.h"
-#include "Board.h"
 #include <set>            // for STD::SET
 #include <cassert>        // for ASSERT
 #include <fstream>        // for IFSTREAM
@@ -18,7 +17,6 @@
 using namespace std;
 
 
-Board board;
 /***************************************************
  * DRAW
  * Draw the current state of the game
@@ -91,27 +89,26 @@ void draw(const Piece* board, const Interface& ui, const set <int>& possible)
  **************************************/
 void callBack(Interface* pUI, void* p)
 {
-    board.callBack(pUI);
-    //set<int> possible;
+    set<int> possible;
 
-    //// Cast the void pointer to a Piece pointer
-    //Piece* board = (Piece*)p;
+    // Cast the void pointer to a Piece pointer
+    Piece* board = (Piece*)p;
 
-    //// move
-    //if (board->move(board, pUI->getPreviousPosition(), pUI->getSelectPosition()))
-    //    pUI->clearSelectPosition();
-    //else
-    //{
-    //    // Call getPossibleMoves through the Piece pointer
-    //    possible = board->getPossibleMoves(board, pUI->getSelectPosition());
-    //}
+    // move
+    if (board->move(board, pUI->getPreviousPosition(), pUI->getSelectPosition()))
+        pUI->clearSelectPosition();
+    else
+    {
+        // Call getPossibleMoves through the Piece pointer
+        possible = board->getPossibleMoves(board, pUI->getSelectPosition());
+    }
 
-    //// if we clicked on a blank spot, then it is not selected
-    //if (pUI->getSelectPosition() != -1 && board[pUI->getSelectPosition()].getType() == ' ')
-    //    pUI->clearSelectPosition();
+    // if we clicked on a blank spot, then it is not selected
+    if (pUI->getSelectPosition() != -1 && board[pUI->getSelectPosition()].getType() == ' ')
+        pUI->clearSelectPosition();
 
-    //// draw the board
-    //draw(board, *pUI, possible);
+    // draw the board
+    draw(board, *pUI, possible);
 }
 
 /********************************************************

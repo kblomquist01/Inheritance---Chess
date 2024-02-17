@@ -103,7 +103,7 @@ public:
 	* MOVE
 	* Execute one movement. Return TRUE if successful
 	*********************************************/
-	virtual bool move(Piece* board[], int positionFrom, int positionTo);
+	virtual bool move(void* board, int positionFrom, int positionTo);
 
 	bool operator==(const Piece& other) const {
 		return this->type == other.type;
@@ -121,7 +121,7 @@ public:
 	virtual set <int> getPossibleMoves(void* board, int location);
 	set <int> Piece::getPossibleChecks(void* bord, int location);
 	bool getIsWhiteTurn() { return isWhiteTurn; };
-	void setIsWhiteTurn(bool turn) {isWhiteTurn = turn;};
+	void setIsWhiteTurn(bool turn) { isWhiteTurn = turn; };
 
 private:
 	char type;

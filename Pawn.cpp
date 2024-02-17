@@ -1,5 +1,8 @@
 #include "Pawn.h"
-
+/****************************************************
+    * MOVE
+    * moves pieces from positionFrom to positionTo if valid
+    ***************************************************/
 bool Pawn::move(Piece board[], int positionFrom, int positionTo) {
     // do not move if a move was not indicated
     if (positionFrom == -1 || positionTo == -1)
@@ -144,7 +147,10 @@ bool Pawn::move(Piece board[], int positionFrom, int positionTo) {
     }
     return false;
 }
-
+/****************************************************
+    * GET POSSIBLE MOVES
+    * returns the moves the selected piece can make
+    ***************************************************/
 set<int> Pawn::getPossibleMoves(void* bord, int location) {
     set <int> possible;
     Piece* board = (Piece*)bord;
@@ -234,10 +240,17 @@ set<int> Pawn::getPossibleMoves(void* bord, int location) {
     }
     return possible;
 }
-
+/****************************************************
+    * SET ENPASSANT
+    * sets the canBeEnpassant variable
+    ***************************************************/
 void Pawn :: setEnpassant(bool enpassant) {
     canBeEnpassant = enpassant;
 }
+/****************************************************
+    * GET ENPASSANT
+    * gets the canBeEnpassant variable
+    ***************************************************/
 bool Pawn::getEnpassant() {
     return canBeEnpassant;
 }

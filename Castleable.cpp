@@ -1,4 +1,8 @@
 #include "Castleable.h"
+/****************************************************
+    * MOVE
+    * moves pieces from positionFrom to positionTo if valid
+    ***************************************************/
 bool Castleable::move(Piece board[], int positionFrom, int positionTo) {
     // do not move if a move was not indicated
     if (positionFrom == -1 || positionTo == -1)
@@ -95,7 +99,10 @@ bool Castleable::move(Piece board[], int positionFrom, int positionTo) {
     }
     return false;
 }
-
+/****************************************************
+    * GET POSSIBLE MOVES
+    * returns the moves the selected piece can make
+    ***************************************************/
 set<int> Castleable::getPossibleMoves(void* bord, int location){
     set <int> possible;
     Piece* board = (Piece*)bord;
@@ -255,10 +262,16 @@ set<int> Castleable::getPossibleMoves(void* bord, int location){
     }
     return possible;
 }
-
+/****************************************************
+    * SET CAN CASTLE
+    * sets the canCastle variable
+    ***************************************************/
 void Castleable::setCanCastle(bool castle) {
     canCastle = castle;
-}
+}/****************************************************
+    * GET ENPASSANT
+    * gets the canCastle variable
+    ***************************************************/
 bool Castleable::getCanCastle() {
     return canCastle;
 }
