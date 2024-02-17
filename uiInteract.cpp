@@ -50,11 +50,11 @@ using namespace std;
  ***********************************/
 int xFromPosition(int position)
 {
-   return (int)((double)(position % 8) * 32.0);
+    return (int)((double)(position % 8) * 32.0);
 }
 int yFromPosition(int position)
 {
-   return (int)((double)(position / 8) * 32.0);
+    return (int)((double)(position / 8) * 32.0);
 }
 
 /*********************************************************************
@@ -66,23 +66,23 @@ int yFromPosition(int position)
  *********************************************************************/
 void sleep(unsigned long msSleep)
 {
-   // Windows handles sleep one way
+    // Windows handles sleep one way
 #ifdef _WIN32
-   ::Sleep(msSleep + 35);
+    ::Sleep(msSleep + 35);
 
-   // Unix-based operating systems (OS-X, Linux) do it another
+    // Unix-based operating systems (OS-X, Linux) do it another
 #else // LINUX, XCODE
-   timespec req = {};
-   time_t sec = (int)(msSleep / 1000);
-   msSleep -= (sec * 1000);
+    timespec req = {};
+    time_t sec = (int)(msSleep / 1000);
+    msSleep -= (sec * 1000);
 
-   req.tv_sec = sec;
-   req.tv_nsec = msSleep * 1000000L;
+    req.tv_sec = sec;
+    req.tv_nsec = msSleep * 1000000L;
 
-   while (nanosleep(&req, &req) == -1)
-      ;
+    while (nanosleep(&req, &req) == -1)
+        ;
 #endif // LINUX, XCODE
-   return;
+    return;
 }
 
 /************************************************************************
@@ -97,25 +97,25 @@ void sleep(unsigned long msSleep)
  *************************************************************************/
 void drawCallback()
 {
-   // even though this is a local variable, all the members are static
-   Interface ui;
-   // Prepare the background buffer for drawing
-   glClear(GL_COLOR_BUFFER_BIT); //clear the screen
-   glColor3f((GLfloat)1.0 /* red % */, (GLfloat)1.0 /* green % */, (GLfloat)1.0 /* blue % */);
-   
-   //calls the client's display function
-   assert(ui.callBack != NULL);
-   ui.callBack(&ui, ui.p);
-   
-   //loop until the timer runs out
-   if (!ui.isTimeToDraw())
-      sleep((unsigned long)((ui.getNextTick() - clock()) / 1000));
+    // even though this is a local variable, all the members are static
+    Interface ui;
+    // Prepare the background buffer for drawing
+    glClear(GL_COLOR_BUFFER_BIT); //clear the screen
+    glColor3f((GLfloat)1.0 /* red % */, (GLfloat)1.0 /* green % */, (GLfloat)1.0 /* blue % */);
 
-   // from this point, set the next draw time
-   ui.setNextDrawTime();
+    //calls the client's display function
+    assert(ui.callBack != NULL);
+    ui.callBack(&ui, ui.p);
 
-   // bring forth the background buffer
-   glutSwapBuffers();
+    //loop until the timer runs out
+    if (!ui.isTimeToDraw())
+        sleep((unsigned long)((ui.getNextTick() - clock()) / 1000));
+
+    // from this point, set the next draw time
+    ui.setNextDrawTime();
+
+    // bring forth the background buffer
+    glutSwapBuffers();
 }
 
 /************************************************************************
@@ -127,22 +127,22 @@ void drawCallback()
  *************************************************************************/
 void clickCallback(int button, int state, int x, int y)
 {
-   // determine what to do if the button is selected
-   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-   {
-      // Even though this is a local variable, all the members are static
-      // so we are actually getting the same version as in the constructor.
-      Interface ui;
+    // determine what to do if the button is selected
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    {
+        // Even though this is a local variable, all the members are static
+        // so we are actually getting the same version as in the constructor.
+        Interface ui;
 
-      // get coordinates from screen dimensions
-      int pos = ui.positionFromXY(x, y);
-      
-      // if the current cell is selected, then deselect it
-      if (ui.getSelectPosition() == pos)
-         ui.clearSelectPosition();
-      else
-         ui.setSelectPosition(pos);
-   }
+        // get coordinates from screen dimensions
+        int pos = ui.positionFromXY(x, y);
+
+        // if the current cell is selected, then deselect it
+        if (ui.getSelectPosition() == pos)
+            ui.clearSelectPosition();
+        else
+            ui.setSelectPosition(pos);
+    }
 }
 
 /************************************************************************
@@ -152,14 +152,14 @@ void clickCallback(int button, int state, int x, int y)
  *************************************************************************/
 void moveCallback(int x, int y)
 {
-   // Even though this is a local variable, all the members are static
-   // so we are actually getting the same version as in the constructor.
-   Interface ui;
+    // Even though this is a local variable, all the members are static
+    // so we are actually getting the same version as in the constructor.
+    Interface ui;
 
-   // get coordinates from screen dimensions
-   int pos = ui.positionFromXY(x, y);
+    // get coordinates from screen dimensions
+    int pos = ui.positionFromXY(x, y);
 
-   ui.setHoverPosition(pos);
+    ui.setHoverPosition(pos);
 }
 
 /************************************************************************
@@ -183,7 +183,7 @@ void resizeCallback(int width, int height)
  *************************************************************************/
 void closeCallback()
 {
-   exit(0);
+    exit(0);
 }
 
 /************************************************************************
@@ -193,7 +193,7 @@ void closeCallback()
  *************************************************************************/
 bool Interface::isTimeToDraw()
 {
-   return ((unsigned int)clock() >= nextTick);
+    return ((unsigned int)clock() >= nextTick);
 }
 
 /************************************************************************
@@ -203,7 +203,7 @@ bool Interface::isTimeToDraw()
  *************************************************************************/
 void Interface::setNextDrawTime()
 {
-   nextTick = clock() + static_cast<unsigned long> (timePeriod * CLOCKS_PER_SEC);
+    nextTick = clock() + static_cast<unsigned long> (timePeriod * CLOCKS_PER_SEC);
 }
 
 /************************************************************************
@@ -229,11 +229,11 @@ int      Interface::posSelectPrevious = -1;
 int      Interface::widthScreen = 32 * 8;
 int      Interface::heightScreen = 32 * 8;
 
-bool          Interface::initialized   = false;
-double        Interface::timePeriod    = 0.2; // default to 5 frames/second
-unsigned long Interface::nextTick      = 0;        // redraw now please
-void *        Interface::p             = NULL;
-void (*Interface::callBack)(Interface *, void *) = NULL;
+bool          Interface::initialized = false;
+double        Interface::timePeriod = 0.2; // default to 5 frames/second
+unsigned long Interface::nextTick = 0;        // redraw now please
+void* Interface::p = NULL;
+void (*Interface::callBack)(Interface*, void*) = NULL;
 
 /************************************************************************
  * INTEFACE : INITIALIZE
@@ -244,43 +244,43 @@ void (*Interface::callBack)(Interface *, void *) = NULL;
  *           argv:       The actual command-line parameters
  *           title:      The text for the titlebar of the window
  *************************************************************************/
-void Interface::initialize(const char * title)
+void Interface::initialize(const char* title)
 {
-   if (initialized)
-      return;
-   
-   // set up the random number generator
-   srand((unsigned int)time(NULL));
+    if (initialized)
+        return;
 
-   // create the window
-   int argc = 0;
-   glutInit(&argc, NULL);
-   glutInitWindowSize(8 * 32 - 1, 8 * 32 - 1);   // size of the window
-            
-   glutInitWindowPosition( 10, 10);                // initial position 
-   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);    // double buffering
-   glutCreateWindow(title);                        // text on titlebar
-   glutIgnoreKeyRepeat(true);
-   
-   // set up the drawing style: B/W and 2D
-   glClearColor(0,0,0, 0);                   // Black is the background color
-   gluOrtho2D((GLdouble)0.0, (GLdouble)(widthScreen),
-              (GLdouble)0.0, (GLdouble)(heightScreen));
-   glutReshapeWindow(widthScreen, heightScreen);
+    // set up the random number generator
+    srand((unsigned int)time(NULL));
 
-   // register the callbacks so OpenGL knows how to call us
-   glutDisplayFunc(      drawCallback    );
-   glutIdleFunc(         drawCallback    );
-   glutMouseFunc(        clickCallback   );
-   glutPassiveMotionFunc(moveCallback    );
-   glutReshapeFunc(      resizeCallback  );
+    // create the window
+    int argc = 0;
+    glutInit(&argc, NULL);
+    glutInitWindowSize(8 * 32 - 1, 8 * 32 - 1);   // size of the window
+
+    glutInitWindowPosition(10, 10);                // initial position 
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);    // double buffering
+    glutCreateWindow(title);                        // text on titlebar
+    glutIgnoreKeyRepeat(true);
+
+    // set up the drawing style: B/W and 2D
+    glClearColor(0, 0, 0, 0);                   // Black is the background color
+    gluOrtho2D((GLdouble)0.0, (GLdouble)(widthScreen),
+        (GLdouble)0.0, (GLdouble)(heightScreen));
+    glutReshapeWindow(widthScreen, heightScreen);
+
+    // register the callbacks so OpenGL knows how to call us
+    glutDisplayFunc(drawCallback);
+    glutIdleFunc(drawCallback);
+    glutMouseFunc(clickCallback);
+    glutPassiveMotionFunc(moveCallback);
+    glutReshapeFunc(resizeCallback);
 #ifdef __APPLE__
-   glutWMCloseFunc(      closeCallback   );
+    glutWMCloseFunc(closeCallback);
 #endif 
-   initialized = true;
-   
-   // done
-   return;
+    initialized = true;
+
+    // done
+    return;
 }
 
 /************************************************************************
@@ -294,14 +294,13 @@ void Interface::initialize(const char * title)
  *                   will need to cast this back to your own data
  *                   type before using it.
  *************************************************************************/
-void Interface::run(void (*callBack)(Interface *, void *), void *p)
+void Interface::run(void (*callBack)(Interface*, void*), void* p)
 {
-   // setup the callbacks
-   this->p = p;
-   this->callBack = callBack;
+    // setup the callbacks
+    this->p = p;
+    this->callBack = callBack;
 
-   glutMainLoop();
+    glutMainLoop();
 
-   return;
+    return;
 }
-

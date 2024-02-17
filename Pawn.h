@@ -9,12 +9,13 @@ class Pawn : public Piece
 public:
 	Pawn(char type) {
 		this->setType(type);
-		this->canEnpassant = false;
+		this->canBeEnpassant = false;
 	}
 	void setEnpassant(bool enpassant);
-
-	/*virtual bool move(Piece* board, int positionFrom, int positionTo) override;*/
+	bool getEnpassant();
+	bool move(Piece board[], int positionFrom, int positionTo);
+	set<int> getPossibleMoves(void* bord, int location) override;
 private:
-	bool canEnpassant;
+	bool canBeEnpassant;
 };
 

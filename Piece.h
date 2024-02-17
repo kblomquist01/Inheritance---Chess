@@ -12,16 +12,19 @@ public:
 		this->type = ' ';
 		canCastle = true;
 		canBeEnpassant = false;
+		isWhiteTurn = true;
 	}
 	Piece(char type) {
 		this->type = type;
 		canCastle = true;
 		canBeEnpassant = false;
+		isWhiteTurn = true;
 	}
 	Piece(char type, bool castle) {
 		this->type = type;
 		canCastle = castle;
 		canBeEnpassant = false;
+		isWhiteTurn = true;
 	}
 	virtual ~Piece() = default;
 	/***********************************************
@@ -35,7 +38,7 @@ public:
 	};
 
 	void setType(char type) {
-		this -> type = type;
+		this->type = type;
 	}
 	char getType() const {
 		return type;
@@ -100,7 +103,7 @@ public:
 	* MOVE
 	* Execute one movement. Return TRUE if successful
 	*********************************************/
-    virtual bool move(void* board, int positionFrom, int positionTo);
+	virtual bool move(Piece* board[], int positionFrom, int positionTo);
 
 	bool operator==(const Piece& other) const {
 		return this->type == other.type;
@@ -113,11 +116,16 @@ public:
 	}
 	bool getCanCastle() const { return canCastle; };
 	bool getCanBeEnpassant() const { return canBeEnpassant; };
-	virtual set <int> getPossibleMoves(const void* board, int location);
+	bool getInCheck(void* board);
+	bool testMoveOutCheck(void* bord, int positionFrom, int positionTo);
+	virtual set <int> getPossibleMoves(void* board, int location);
+	set <int> Piece::getPossibleChecks(void* bord, int location);
+	bool getIsWhiteTurn() { return isWhiteTurn; };
+	void setIsWhiteTurn(bool turn) {isWhiteTurn = turn;};
 
 private:
 	char type;
 	bool canCastle;
 	bool canBeEnpassant;
+	bool isWhiteTurn;
 };
-
